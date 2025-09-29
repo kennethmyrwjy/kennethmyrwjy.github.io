@@ -66,11 +66,11 @@
             headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
-        if (data.data && data.data.display_name) {
+        if (data.data && data.data.user && data.data.user.display_name) {
             document.getElementById('profile').innerHTML =
-                `<h4>Welcome, ${data.data.display_name}</h4>
-                <img src="${data.data.avatar_url}" alt="Avatar" style="width:60px; border-radius:28px;">
-                <p>open_id: ${data.data.open_id}</p>`;
+                `<h4>Welcome, ${data.data.user.display_name}</h4>
+                <img src="${data.data.user.avatar_url}" alt="Avatar" style="width:60px; border-radius:28px;">
+                <p>open_id: ${data.data.user.open_id}</p>`;
         } else {
             document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
         }
