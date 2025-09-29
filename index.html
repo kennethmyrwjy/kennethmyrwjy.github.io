@@ -5,7 +5,7 @@
     <title>TikTok Login Demo (Insecure)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, background: #f5f8fc; }
+        body { font-family: Arial; background: #f5f8fc; }
         .container { max-width: 400px; margin: 80px auto; background: #fff; padding: 32px 22px; border-radius: 10px; box-shadow: 0 2px 18px #eaeaea; }
         h2 { font-weight: 600; }
         button { padding: 12px 32px; background: #16181a; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
@@ -26,7 +26,7 @@
         const CLIENT_KEY = "sbawjjtuzyd0z5u7fv";
         const CLIENT_SECRET = "Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO";
         const REDIRECT_URI = "https://kennethmyrwjy.github.io/callback.html"; // This page's URL must match TikTok registered redirect URI
-        const SCOPES = "user.info.basic user.info.profile user.info.stats video.list";
+        const SCOPES = "user.info.basic,user.info.profile,user.info.stats,video.list";
         const AUTHORIZE_URL = "https://www.tiktok.com/v2/auth/authorize/";
 
         function createState() {
