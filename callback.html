@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TikTok Login Callback</title>
+    <style>
+        body { font-family: Arial, background: #f7fafe; }
+        .container { max-width: 360px; margin: 70px auto; background: #fff; padding: 32px; border-radius: 10px; box-shadow: 0px 2px 16px #eaeaea; }
+        .profile { margin-top: 25px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>TikTok OAuth Callback</h2>
+    <div id="result">Processing TikTok login ...</div>
+    <div class="profile" id="profile"></div>
+</div>
+<script>
+    // ==== Replace with your credentials for the test ====
+    const CLIENT_KEY = 'sbawjjtuzyd0z5u7fv';
+    const CLIENT_SECRET = 'Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO';
+    const REDIRECT_URI = 'https://kennethmyrwjy.github.io/callback.html';
+
+    function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    async function main() {
+        const code = getQueryParam('code');
+        if (!code) {
+            document.getElementById('result').innerText = 'Error: No OAuth code received from TikTok!';
+            return;
+        }
+        document.getElementById('result').innerText = 'Exchanging code for access token...';
+
+        // For demo only (never expose secret in production)
+        const params = new URLSearchParams({
+            client_key: CLIENT_KEY,
+            client_secret: CLIENT_SECRET,
+            code: code,
+            grant_type: 'authorization_code',
+            redirect_uri: REDIRECT_URI
+        });
+
+        try {
+            const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await res.json();
+            if (data.access_token && data.open_id) {
+                document.getElementById('result').innerText = 'Token acquired. Loading profile info...';
+                fetchProfile(data.access_token);
+            } else {
+                document.getElementById('result').innerText = 'Failed to get access token: ' + JSON.stringify(data);
+            }
+        } catch (e) {
+            document.getElementById('result').innerText = 'Token exchange failed: ' + e;
+        }
+    }
+
+    async function fetchProfile(token) {
+        const res = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.data && data.data.display_name) {
+            document.getElementById('profile').innerHTML =
+                `<h4>Welcome, ${data.data.display_name}</h4>
+                <img src="${data.data.avatar_url}" alt="Avatar" style="width:60px; border-radius:28px;">
+                <p>open_id: ${data.data.open_id}</p>`;
+        } else {
+            document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
+        }
+    }
+
+    main();
+</script>
+</body>
+</html>
