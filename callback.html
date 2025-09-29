@@ -5,8 +5,14 @@
     <title>TikTok Login Callback</title>
     <style>
         body { font-family: Arial; background: #f7fafe; }
-        .container { max-width: 360px; margin: 70px auto; background: #fff; padding: 32px; border-radius: 10px; box-shadow: 0px 2px 16px #eaeaea; }
+        .container { max-width: 460px; margin: 70px auto; background: #fff; padding: 32px; border-radius: 10px; box-shadow: 0px 2px 16px #eaeaea; }
         .profile { margin-top: 25px; }
+        .avatar { width:60px; border-radius:28px; }
+        table { width:100%; border-collapse: collapse; margin-top:18px; }
+        td, th { padding: 5px 10px; border-bottom:1px solid #eee; }
+        th { background: #eaf7fa;}
+        .videos { margin-top: 20px; }
+        .video-thumb { width:56px; border-radius:9px; }
     </style>
 </head>
 <body>
@@ -14,6 +20,7 @@
     <h2>TikTok OAuth Callback</h2>
     <div id="result">Processing TikTok login ...</div>
     <div class="profile" id="profile"></div>
+    <div class="videos" id="videos"></div>
 </div>
 <script>
     // ==== Replace with your credentials for the test ====
@@ -34,7 +41,6 @@
         }
         document.getElementById('result').innerText = 'Exchanging code for access token...';
 
-        // For demo only (never expose secret in production)
         const params = new URLSearchParams({
             client_key: CLIENT_KEY,
             client_secret: CLIENT_SECRET,
@@ -53,6 +59,7 @@
             if (data.access_token && data.open_id) {
                 document.getElementById('result').innerText = 'Token acquired. Loading profile info...';
                 fetchProfile(data.access_token);
+                fetchVideos(data.access_token, data.open_id); // option to load videos
             } else {
                 document.getElementById('result').innerText = 'Failed to get access token: ' + JSON.stringify(data);
             }
@@ -62,17 +69,58 @@
     }
 
     async function fetchProfile(token) {
-        const res = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url', {
+        // Extended fields for profile, stats, profile info
+        const url = 'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url,bio_description,follower_count,following_count,likes_count,video_count,is_verified,profile_deep_link,region,gender,signup_time,extra';
+        const res = await fetch(url, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
-        if (data.data && data.data.user && data.data.user.display_name) {
+        if (data.data && data.data.user) {
+            const u = data.data.user;
+
             document.getElementById('profile').innerHTML =
-                `<h4>Welcome, ${data.data.user.display_name}</h4>
-                <img src="${data.data.user.avatar_url}" alt="Avatar" style="width:60px; border-radius:28px;">
-                <p>open_id: ${data.data.user.open_id}</p>`;
+                `<img class="avatar" src="${u.avatar_url}" alt="Avatar"><br>
+                <table>
+                  <tr><th>Display Name</th><td>${u.display_name || ''}</td></tr>
+                  <tr><th>Open ID</th><td>${u.open_id || ''}</td></tr>
+                  <tr><th>Bio</th><td>${u.bio_description || ''}</td></tr>
+                  <tr><th>Region</th><td>${u.region || ''}</td></tr>
+                  <tr><th>Gender</th><td>${u.gender || ''}</td></tr>
+                  <tr><th>Verified</th><td>${u.is_verified ? 'Yes' : 'No'}</td></tr>
+                  <tr><th>Followers</th><td>${u.follower_count || 0}</td></tr>
+                  <tr><th>Following</th><td>${u.following_count || 0}</td></tr>
+                  <tr><th>Likes</th><td>${u.likes_count || 0}</td></tr>
+                  <tr><th>Video Count</th><td>${u.video_count || 0}</td></tr>
+                  <tr><th>Profile Link</th><td>${u.profile_deep_link ? `<a href="${u.profile_deep_link}" target="_blank">Link</a>` : ''}</td></tr>
+                  <tr><th>Signup Time</th><td>${u.signup_time || ''}</td></tr>
+                </table>`;
         } else {
             document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
+        }
+    }
+
+    async function fetchVideos(token, open_id) {
+        // Pull videos if scope allows
+        const url = `https://open.tiktokapis.com/v2/video/list/?fields=video_id,video_description,cover_image_url,share_url,create_time,duration,tags,statistics&open_id=${open_id}`;
+        const res = await fetch(url, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.data && Array.isArray(data.data.videos) && data.data.videos.length > 0) {
+            let html = `<h4>User Videos:</h4><ul>`;
+            for (const v of data.data.videos) {
+                html += `<li>
+                  <img class="video-thumb" src="${v.cover_image_url}" alt="Video thumb">
+                  <a href="${v.share_url}" target="_blank">${v.video_description || 'No Description'}</a>
+                  <br>Duration: ${v.duration}s
+                  <br>Views: ${v.statistics && v.statistics.view_count ? v.statistics.view_count : 0}
+                  <br>Created: ${v.create_time}
+                </li>`;
+            }
+            html += `</ul>`;
+            document.getElementById('videos').innerHTML = html;
+        } else {
+            document.getElementById('videos').innerText = 'No videos found or not permitted by scope.';
         }
     }
 
