@@ -50,7 +50,7 @@
             return;
         }
         const SCOPES = checkedScopes.join(' ');
-        print(SCOPES)
+        console.log(SCOPES)
         const state = createState();
         localStorage.setItem("tiktokState", state);
         const url = `${AUTHORIZE_URL}?client_key=${encodeURIComponent(CLIENT_KEY)}&scope=${encodeURIComponent(SCOPES)}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
