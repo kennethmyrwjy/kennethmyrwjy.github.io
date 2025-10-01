@@ -59,7 +59,7 @@
             if (data.access_token && data.open_id) {
                 document.getElementById('result').innerText = 'Token acquired. Loading profile info...';
                 fetchProfile(data.access_token);
-                // fetchVideos(data.access_token, data.open_id); // option to load videos
+                fetchVideos(data.access_token, data.open_id); // option to load videos
             } else {
                 document.getElementById('result').innerText = 'Failed to get access token: ' + JSON.stringify(data);
             }
