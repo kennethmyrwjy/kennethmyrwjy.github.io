@@ -75,24 +75,36 @@
             headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
+        
+        // Check for errors (including scope authorization issues)
+        if (data.error) {
+            document.getElementById('profile').innerHTML = 
+                `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                    <strong>Error fetching profile:</strong><br>
+                    ${data.error.message || JSON.stringify(data.error)}<br><br>
+                    <em>This may be due to missing scopes. Make sure you selected all required scopes on the login page and that your TikTok app has these scopes approved in the Developer Portal.</em>
+                </div>`;
+            return;
+        }
+        
         if (data.data && data.data.user) {
             const u = data.data.user;
 
             document.getElementById('profile').innerHTML =
-                `<img class="avatar" src="${u.avatar_url}" alt="Avatar"><br>
+                `<img class="avatar" src="${u.avatar_url || ''}" alt="Avatar"><br>
                 <table>
-                  <tr><th>Display Name</th><td>${u.display_name || ''}</td></tr>
-                  <tr><th>Open ID</th><td>${u.open_id || ''}</td></tr>
-                  <tr><th>Bio</th><td>${u.bio_description || ''}</td></tr>
-                  <tr><th>Region</th><td>${u.region || ''}</td></tr>
-                  <tr><th>Gender</th><td>${u.gender || ''}</td></tr>
+                  <tr><th>Display Name</th><td>${u.display_name || 'N/A'}</td></tr>
+                  <tr><th>Open ID</th><td>${u.open_id || 'N/A'}</td></tr>
+                  <tr><th>Bio</th><td>${u.bio_description || 'N/A'}</td></tr>
+                  <tr><th>Region</th><td>${u.region || 'N/A'}</td></tr>
+                  <tr><th>Gender</th><td>${u.gender || 'N/A'}</td></tr>
                   <tr><th>Verified</th><td>${u.is_verified ? 'Yes' : 'No'}</td></tr>
-                  <tr><th>Followers</th><td>${u.follower_count || 0}</td></tr>
-                  <tr><th>Following</th><td>${u.following_count || 0}</td></tr>
-                  <tr><th>Likes</th><td>${u.likes_count || 0}</td></tr>
-                  <tr><th>Video Count</th><td>${u.video_count || 0}</td></tr>
-                  <tr><th>Profile Link</th><td>${u.profile_deep_link ? `<a href="${u.profile_deep_link}" target="_blank">Link</a>` : ''}</td></tr>
-                  <tr><th>Signup Time</th><td>${u.signup_time || ''}</td></tr>
+                  <tr><th>Followers</th><td>${u.follower_count !== undefined ? u.follower_count : 'N/A'}</td></tr>
+                  <tr><th>Following</th><td>${u.following_count !== undefined ? u.following_count : 'N/A'}</td></tr>
+                  <tr><th>Likes</th><td>${u.likes_count !== undefined ? u.likes_count : 'N/A'}</td></tr>
+                  <tr><th>Video Count</th><td>${u.video_count !== undefined ? u.video_count : 'N/A'}</td></tr>
+                  <tr><th>Profile Link</th><td>${u.profile_deep_link ? `<a href="${u.profile_deep_link}" target="_blank">Link</a>` : 'N/A'}</td></tr>
+                  <tr><th>Signup Time</th><td>${u.signup_time || 'N/A'}</td></tr>
                 </table>`;
         } else {
             document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
@@ -106,6 +118,18 @@
             headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
+        
+        // Check for errors (including scope authorization issues)
+        if (data.error) {
+            document.getElementById('videos').innerHTML = 
+                `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                    <strong>Error fetching videos:</strong><br>
+                    ${data.error.message || JSON.stringify(data.error)}<br><br>
+                    <em>Make sure you selected the "video.list" scope and that it's approved in your TikTok Developer Portal.</em>
+                </div>`;
+            return;
+        }
+        
         if (data.data && Array.isArray(data.data.videos) && data.data.videos.length > 0) {
             let html = `<h4>User Videos:</h4><ul>`;
             for (const v of data.data.videos) {
@@ -119,8 +143,10 @@
             }
             html += `</ul>`;
             document.getElementById('videos').innerHTML = html;
+        } else if (data.data && Array.isArray(data.data.videos) && data.data.videos.length === 0) {
+            document.getElementById('videos').innerText = 'No videos found for this user.';
         } else {
-            document.getElementById('videos').innerText = 'No videos found or not permitted by scope.';
+            document.getElementById('videos').innerText = 'Unable to fetch videos. This may be due to missing "video.list" scope or the user has no videos.';
         }
     }
 

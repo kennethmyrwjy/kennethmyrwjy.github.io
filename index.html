@@ -21,10 +21,12 @@
         <h2>Login with TikTok (DEMO)</h2>
         <form onsubmit="loginTikTok(); return false;">
             <div class="scopes">
-                <label><input type="checkbox" class="scope" value="user.info.basic" checked> user.info.basic</label>
-                <label><input type="checkbox" class="scope" value="user.info.profile"> user.info.profile</label>
-                <label><input type="checkbox" class="scope" value="user.info.stats"> user.info.stats</label>
-                <label><input type="checkbox" class="scope" value="video.list"> video.list</label>
+                <p style="margin-top: 0; color: #555; font-size: 14px;">Select the data you want to access:</p>
+                <label><input type="checkbox" class="scope" value="user.info.basic" checked> user.info.basic <span style="color: #888; font-size: 12px;">(name, avatar)</span></label>
+                <label><input type="checkbox" class="scope" value="user.info.profile" checked> user.info.profile <span style="color: #888; font-size: 12px;">(bio, region, gender)</span></label>
+                <label><input type="checkbox" class="scope" value="user.info.stats" checked> user.info.stats <span style="color: #888; font-size: 12px;">(followers, likes, video count)</span></label>
+                <label><input type="checkbox" class="scope" value="video.list" checked> video.list <span style="color: #888; font-size: 12px;">(user's videos)</span></label>
+                <p style="margin-bottom: 0; color: #f39c12; font-size: 13px;">⚠️ All scopes must be approved in your TikTok Developer Portal</p>
             </div>
             <button type="submit">Continue with TikTok</button>
         </form>
