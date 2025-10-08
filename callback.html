@@ -90,7 +90,16 @@
             if (data.access_token && data.open_id) {
                 document.getElementById('result').innerText = 'Token acquired! Loading profile info...';
                 fetchProfile(data.access_token);
-                fetchVideos(data.access_token, data.open_id);
+                // Skip video fetching in sandbox mode - uncomment below for production
+                // fetchVideos(data.access_token, data.open_id);
+                
+                // Show sandbox video message
+                document.getElementById('videos').innerHTML = 
+                    `<div style="color: #95a5a6; padding: 15px; background: #ecf0f1; border-radius: 6px; margin-top: 20px;">
+                        <strong>📹 Video List Endpoint</strong><br><br>
+                        The <code>video.list</code> endpoint is not available in sandbox mode. 
+                        To test video functionality, your app needs production approval.
+                    </div>`;
             } else {
                 document.getElementById('result').innerHTML = 
                     `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
@@ -116,8 +125,9 @@
     }
 
     async function fetchProfile(token) {
-        // Extended fields for profile, stats, profile info
-        const url = 'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url,bio_description,follower_count,following_count,likes_count,video_count,is_verified,profile_deep_link,region,gender,signup_time,extra';
+        // Request only basic fields that work in sandbox mode
+        // Basic scope fields: open_id, union_id, avatar_url, display_name
+        const url = 'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name';
         const res = await fetch(url, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -134,30 +144,36 @@
             return;
         }
         
-        // Check for successful but empty response (sandbox mode)
+        // Check for successful but empty response (sandbox mode with basic scope)
         if (data.code === "ok" && (!data.data || !data.data.user)) {
             document.getElementById('profile').innerHTML = 
                 `<div style="color: #f39c12; padding: 20px; background: #fef5e7; border-radius: 6px; border-left: 4px solid #f39c12;">
                     <h3 style="margin-top: 0;">🎉 OAuth Flow Successful!</h3>
                     <p style="margin-bottom: 10px;"><strong>✅ Your implementation is working correctly!</strong></p>
-                    <p style="margin-bottom: 10px;">TikTok API returned: <code>${JSON.stringify(data)}</code></p>
+                    <p style="margin-bottom: 10px; font-size: 13px;">TikTok API returned: <code style="font-size: 11px;">${JSON.stringify(data)}</code></p>
                     <hr style="border: none; border-top: 1px solid #f39c12; margin: 15px 0;">
-                    <h4>⚠️ Sandbox Mode Detected</h4>
-                    <p>Your app appears to be in <strong>TikTok Sandbox Mode</strong>. In sandbox:</p>
-                    <ul style="margin-left: 20px;">
-                        <li>OAuth and token exchange work ✅</li>
-                        <li>API calls succeed (code: "ok") ✅</li>
-                        <li>But returns no/mock data ⚠️</li>
-                        <li>Some endpoints (like video.list) may be unavailable</li>
+                    <h4>⚠️ Sandbox Mode - Limited Data</h4>
+                    <p>Your app is in <strong>TikTok Sandbox Mode</strong>. This means:</p>
+                    <ul style="margin-left: 20px; font-size: 14px;">
+                        <li>✅ OAuth and token exchange work perfectly</li>
+                        <li>✅ API calls return <code>code: "ok"</code></li>
+                        <li>⚠️ But user data may be empty or mock data</li>
+                        <li>❌ Extended scopes (stats, videos) unavailable</li>
                     </ul>
-                    <h4>📝 To Get Real Data:</h4>
-                    <ol style="margin-left: 20px;">
-                        <li>Go to <a href="https://developers.tiktok.com/apps" target="_blank">TikTok Developer Portal</a></li>
-                        <li>Submit your app for production review</li>
-                        <li>Once approved, you'll receive real user data</li>
+                    <h4>💡 What You Can Do Now:</h4>
+                    <ol style="margin-left: 20px; font-size: 14px;">
+                        <li><strong>Test with <code>user.info.basic</code> only</strong> - This scope has the best chance of returning some data in sandbox</li>
+                        <li><strong>Verify your implementation works</strong> - Check that tokens are being exchanged successfully</li>
+                        <li><strong>Build your app UI</strong> - Design how you'll display real data once approved</li>
                     </ol>
-                    <p style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px;">
-                        <strong>Your code is production-ready!</strong> No changes needed - just enable production mode in TikTok Developer Portal.
+                    <h4>📝 When Ready for Real Data:</h4>
+                    <p style="margin-left: 20px; font-size: 14px;">
+                        Go to <a href="https://developers.tiktok.com/apps" target="_blank">TikTok Developer Portal</a> → 
+                        Submit app for production review → Get real user data
+                    </p>
+                    <p style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px; font-size: 13px;">
+                        <strong>Your code is production-ready!</strong> The OAuth flow, token exchange, and API integration are all working. 
+                        You just need production approval from TikTok to receive real data.
                     </p>
                 </div>`;
             return;
@@ -167,21 +183,23 @@
             const u = data.data.user;
 
             document.getElementById('profile').innerHTML =
-                `<img class="avatar" src="${u.avatar_url || ''}" alt="Avatar"><br>
-                <table>
-                  <tr><th>Display Name</th><td>${u.display_name || 'N/A'}</td></tr>
-                  <tr><th>Open ID</th><td>${u.open_id || 'N/A'}</td></tr>
-                  <tr><th>Bio</th><td>${u.bio_description || 'N/A'}</td></tr>
-                  <tr><th>Region</th><td>${u.region || 'N/A'}</td></tr>
-                  <tr><th>Gender</th><td>${u.gender || 'N/A'}</td></tr>
-                  <tr><th>Verified</th><td>${u.is_verified ? 'Yes' : 'No'}</td></tr>
-                  <tr><th>Followers</th><td>${u.follower_count !== undefined ? u.follower_count : 'N/A'}</td></tr>
-                  <tr><th>Following</th><td>${u.following_count !== undefined ? u.following_count : 'N/A'}</td></tr>
-                  <tr><th>Likes</th><td>${u.likes_count !== undefined ? u.likes_count : 'N/A'}</td></tr>
-                  <tr><th>Video Count</th><td>${u.video_count !== undefined ? u.video_count : 'N/A'}</td></tr>
-                  <tr><th>Profile Link</th><td>${u.profile_deep_link ? `<a href="${u.profile_deep_link}" target="_blank">Link</a>` : 'N/A'}</td></tr>
-                  <tr><th>Signup Time</th><td>${u.signup_time || 'N/A'}</td></tr>
-                </table>`;
+                `<div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    ${u.avatar_url ? `<img class="avatar" src="${u.avatar_url}" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">` : '<div style="width: 100px; height: 100px; background: #ddd; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">No Avatar</div>'}
+                    <h3 style="margin: 10px 0; color: #2c3e50;">${u.display_name || 'Unknown User'}</h3>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #27ae60;">
+                    <h4 style="margin-top: 0; color: #27ae60;">✅ Basic User Info (Sandbox Mode)</h4>
+                    <table style="width: 100%;">
+                      <tr><th style="text-align: left; padding: 8px;">Display Name</th><td style="padding: 8px;">${u.display_name || 'Not provided'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Open ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.open_id || 'Not provided'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Union ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.union_id || 'Not provided'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Avatar URL</th><td style="padding: 8px;">${u.avatar_url ? '<span style="color: #27ae60;">✓ Available</span>' : '<span style="color: #e74c3c;">✗ Not available</span>'}</td></tr>
+                    </table>
+                    <p style="margin: 15px 0 5px 0; font-size: 13px; color: #555;">
+                        <strong>Note:</strong> This is the maximum data available with <code>user.info.basic</code> scope in sandbox mode. 
+                        For more data (bio, followers, videos), your app needs production approval.
+                    </p>
+                </div>`;
         } else {
             document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
         }

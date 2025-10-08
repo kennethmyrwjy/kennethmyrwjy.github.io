@@ -23,11 +23,11 @@
         <form onsubmit="loginTikTok(); return false;">
             <div class="scopes">
                 <p style="margin-top: 0; color: #555; font-size: 14px;">Select the data you want to access:</p>
-                <label><input type="checkbox" class="scope" value="user.info.basic" checked> user.info.basic <span style="color: #888; font-size: 12px;">(name, avatar)</span></label>
-                <label><input type="checkbox" class="scope" value="user.info.profile" checked> user.info.profile <span style="color: #888; font-size: 12px;">(bio, region, gender)</span></label>
-                <label><input type="checkbox" class="scope" value="user.info.stats" checked> user.info.stats <span style="color: #888; font-size: 12px;">(followers, likes, video count)</span></label>
-                <label><input type="checkbox" class="scope" value="video.list" checked> video.list <span style="color: #888; font-size: 12px;">(user's videos)</span></label>
-                <p style="margin-bottom: 0; color: #f39c12; font-size: 13px;">⚠️ All scopes must be approved in your TikTok Developer Portal</p>
+                <label><input type="checkbox" class="scope" value="user.info.basic" checked> user.info.basic <span style="color: #888; font-size: 12px;">(name, avatar, open_id)</span> <strong style="color: #27ae60;">✓ Works in Sandbox</strong></label>
+                <label><input type="checkbox" class="scope" value="user.info.profile"> user.info.profile <span style="color: #888; font-size: 12px;">(bio, region, gender)</span> <span style="color: #e67e22;">⚠️ Limited in Sandbox</span></label>
+                <label><input type="checkbox" class="scope" value="user.info.stats"> user.info.stats <span style="color: #888; font-size: 12px;">(followers, likes, video count)</span> <span style="color: #e67e22;">⚠️ Limited in Sandbox</span></label>
+                <label><input type="checkbox" class="scope" value="video.list"> video.list <span style="color: #888; font-size: 12px;">(user's videos)</span> <span style="color: #e74c3c;">✗ Not available in Sandbox</span></label>
+                <p style="margin-bottom: 0; color: #3498db; font-size: 13px;">💡 For sandbox testing, use only <strong>user.info.basic</strong></p>
             </div>
             <button type="submit">Continue with TikTok</button>
         </form>
