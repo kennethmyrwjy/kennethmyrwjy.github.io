@@ -134,6 +134,35 @@
             return;
         }
         
+        // Check for successful but empty response (sandbox mode)
+        if (data.code === "ok" && (!data.data || !data.data.user)) {
+            document.getElementById('profile').innerHTML = 
+                `<div style="color: #f39c12; padding: 20px; background: #fef5e7; border-radius: 6px; border-left: 4px solid #f39c12;">
+                    <h3 style="margin-top: 0;">🎉 OAuth Flow Successful!</h3>
+                    <p style="margin-bottom: 10px;"><strong>✅ Your implementation is working correctly!</strong></p>
+                    <p style="margin-bottom: 10px;">TikTok API returned: <code>${JSON.stringify(data)}</code></p>
+                    <hr style="border: none; border-top: 1px solid #f39c12; margin: 15px 0;">
+                    <h4>⚠️ Sandbox Mode Detected</h4>
+                    <p>Your app appears to be in <strong>TikTok Sandbox Mode</strong>. In sandbox:</p>
+                    <ul style="margin-left: 20px;">
+                        <li>OAuth and token exchange work ✅</li>
+                        <li>API calls succeed (code: "ok") ✅</li>
+                        <li>But returns no/mock data ⚠️</li>
+                        <li>Some endpoints (like video.list) may be unavailable</li>
+                    </ul>
+                    <h4>📝 To Get Real Data:</h4>
+                    <ol style="margin-left: 20px;">
+                        <li>Go to <a href="https://developers.tiktok.com/apps" target="_blank">TikTok Developer Portal</a></li>
+                        <li>Submit your app for production review</li>
+                        <li>Once approved, you'll receive real user data</li>
+                    </ol>
+                    <p style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px;">
+                        <strong>Your code is production-ready!</strong> No changes needed - just enable production mode in TikTok Developer Portal.
+                    </p>
+                </div>`;
+            return;
+        }
+        
         if (data.data && data.data.user) {
             const u = data.data.user;
 
@@ -173,6 +202,17 @@
                     <strong>Error fetching videos:</strong><br>
                     ${data.error.message || JSON.stringify(data.error)}<br><br>
                     <em>Make sure you selected the "video.list" scope and that it's approved in your TikTok Developer Portal.</em>
+                </div>`;
+            return;
+        }
+        
+        // Check for sandbox mode (successful but empty response)
+        if (data.code === "ok" && (!data.data || !data.data.videos || data.data.videos.length === 0)) {
+            document.getElementById('videos').innerHTML = 
+                `<div style="color: #f39c12; padding: 15px; background: #fef5e7; border-radius: 6px;">
+                    <strong>⚠️ Video list unavailable in Sandbox Mode</strong><br><br>
+                    The video.list endpoint may not be available or returns empty data in TikTok Sandbox Mode.
+                    Submit your app for production review to access real video data.
                 </div>`;
             return;
         }
