@@ -55,6 +55,25 @@
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: params.toString()
             });
+            
+            // Check if response is OK first
+            if (!res.ok) {
+                const errorText = await res.text();
+                document.getElementById('result').innerHTML = 
+                    `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                        <strong>Token Exchange Failed (HTTP ${res.status})</strong><br><br>
+                        Error: ${errorText}<br><br>
+                        <strong>Common Causes:</strong><br>
+                        • CORS issue - TikTok may block direct browser requests<br>
+                        • Invalid client credentials<br>
+                        • Redirect URI mismatch<br>
+                        • Authorization code expired/already used<br><br>
+                        <em>💡 TIP: You may need a backend proxy server to handle token exchange securely.</em>
+                    </div>`;
+                console.error('Token exchange error:', errorText);
+                return;
+            }
+            
             const data = await res.json();
             if (data.access_token && data.open_id) {
                 document.getElementById('result').innerText = 'Token acquired. Loading profile info...';
@@ -64,7 +83,15 @@
                 document.getElementById('result').innerText = 'Failed to get access token: ' + JSON.stringify(data);
             }
         } catch (e) {
-            document.getElementById('result').innerText = 'Token exchange failed: ' + e;
+            document.getElementById('result').innerHTML = 
+                `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                    <strong>Token Exchange Error:</strong><br>
+                    ${e.message}<br><br>
+                    Check browser console for details.<br><br>
+                    <strong>If you see CORS errors:</strong> TikTok's token endpoint blocks direct browser calls. 
+                    You'll need a backend proxy server.
+                </div>`;
+            console.error('Token exchange exception:', e);
         }
     }
 
