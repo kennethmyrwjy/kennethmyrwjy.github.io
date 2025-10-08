@@ -27,6 +27,11 @@
     const CLIENT_KEY = 'sbawjjtuzyd0z5u7fv';
     const CLIENT_SECRET = 'Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO';
     const REDIRECT_URI = 'https://kennethmyrwjy.github.io/callback.html';
+    
+    // ==== PROXY SERVER CONFIGURATION ====
+    // Change this to your deployed proxy URL (e.g., https://your-app.onrender.com)
+    // For local testing: 'http://localhost:3000'
+    const PROXY_URL = 'http://localhost:3000'; // UPDATE THIS AFTER DEPLOYMENT!
 
     function getQueryParam(name) {
         const params = new URLSearchParams(window.location.search);
@@ -39,57 +44,71 @@
             document.getElementById('result').innerText = 'Error: No OAuth code received from TikTok!';
             return;
         }
-        document.getElementById('result').innerText = 'Exchanging code for access token...';
+        document.getElementById('result').innerText = 'Exchanging code for access token via proxy...';
 
-        const params = new URLSearchParams({
-            client_key: CLIENT_KEY,
-            client_secret: CLIENT_SECRET,
-            code: code,
-            grant_type: 'authorization_code',
-            redirect_uri: REDIRECT_URI
+        console.log('Token exchange request via proxy:', {
+            proxyUrl: PROXY_URL,
+            code: code.substring(0, 10) + '...' // Log partial code for debugging
         });
 
         try {
-            const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+            // Call proxy server instead of TikTok directly
+            const res = await fetch(`${PROXY_URL}/token-exchange`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
             });
             
             // Check if response is OK first
             if (!res.ok) {
-                const errorText = await res.text();
+                const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
                 document.getElementById('result').innerHTML = 
                     `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
-                        <strong>Token Exchange Failed (HTTP ${res.status})</strong><br><br>
-                        Error: ${errorText}<br><br>
-                        <strong>Common Causes:</strong><br>
-                        • CORS issue - TikTok may block direct browser requests<br>
-                        • Invalid client credentials<br>
-                        • Redirect URI mismatch<br>
-                        • Authorization code expired/already used<br><br>
-                        <em>💡 TIP: You may need a backend proxy server to handle token exchange securely.</em>
+                        <strong>Proxy Server Error (HTTP ${res.status})</strong><br><br>
+                        ${JSON.stringify(errorData, null, 2)}<br><br>
+                        <strong>Troubleshooting:</strong><br>
+                        • Make sure proxy server is running at: <code>${PROXY_URL}</code><br>
+                        • Check if authorization code is valid (codes expire quickly!)<br>
+                        • Verify CLIENT_KEY and CLIENT_SECRET in proxy server<br>
+                        • Check proxy server logs for details<br><br>
+                        <em>💡 Run: <code>cd proxy-server && npm install && npm start</code></em>
                     </div>`;
-                console.error('Token exchange error:', errorText);
+                console.error('Proxy error:', errorData);
                 return;
             }
             
             const data = await res.json();
+            console.log('Token exchange response:', {
+                hasAccessToken: !!data.access_token,
+                hasOpenId: !!data.open_id,
+                error: data.error
+            });
+
             if (data.access_token && data.open_id) {
-                document.getElementById('result').innerText = 'Token acquired. Loading profile info...';
+                document.getElementById('result').innerText = 'Token acquired! Loading profile info...';
                 fetchProfile(data.access_token);
-                fetchVideos(data.access_token, data.open_id); // option to load videos
+                fetchVideos(data.access_token, data.open_id);
             } else {
-                document.getElementById('result').innerText = 'Failed to get access token: ' + JSON.stringify(data);
+                document.getElementById('result').innerHTML = 
+                    `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                        <strong>Token Exchange Failed</strong><br><br>
+                        ${JSON.stringify(data, null, 2)}<br><br>
+                        <em>Check the proxy server logs for more details.</em>
+                    </div>`;
             }
         } catch (e) {
             document.getElementById('result').innerHTML = 
                 `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
-                    <strong>Token Exchange Error:</strong><br>
+                    <strong>Connection Error:</strong><br>
                     ${e.message}<br><br>
-                    Check browser console for details.<br><br>
-                    <strong>If you see CORS errors:</strong> TikTok's token endpoint blocks direct browser calls. 
-                    You'll need a backend proxy server.
+                    <strong>Is your proxy server running?</strong><br>
+                    • Local: Make sure it's running at <code>${PROXY_URL}</code><br>
+                    • Deployed: Update PROXY_URL to your deployed server URL<br><br>
+                    <strong>To start locally:</strong><br>
+                    <code>cd proxy-server && npm install && npm start</code><br><br>
+                    Check browser console for more details.
                 </div>`;
             console.error('Token exchange exception:', e);
         }
