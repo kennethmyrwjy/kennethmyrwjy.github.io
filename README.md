@@ -60,36 +60,40 @@ The `config.js` file is already configured with your settings. Just open `index.
 
 ## 🔐 What's Kept Secret
 
-These files contain sensitive data and are **never committed to Git**:
+### ❌ NEVER Commit (Contains Secrets):
 
 | File | Contains | Status |
 |------|----------|--------|
-| `proxy-server/.env` | CLIENT_KEY, CLIENT_SECRET, REDIRECT_URI | ✅ Gitignored |
-| `config.js` | Your frontend configuration | ✅ Gitignored |
+| `proxy-server/.env` | CLIENT_SECRET + other credentials | ✅ Gitignored |
 
-These files are **templates** and **should be committed**:
+### ✅ SAFE to Commit (No Secrets):
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `proxy-server/.env.example` | Template for .env | ⚠️ Commit this |
-| `config.example.js` | Template for config.js | ⚠️ Commit this |
+| File | Contains | Why It's Safe |
+|------|----------|---------------|
+| `config.js` | CLIENT_KEY, URLs, endpoints | No CLIENT_SECRET - all public info |
+| `config.example.js` | Template for config.js | Template only |
+| `proxy-server/.env.example` | Template for .env | Template only |
+| All HTML, JS, docs | Frontend code | No secrets anywhere |
+
+**Key Point:** `config.js` is **safe to commit** for GitHub Pages because it contains **NO** `CLIENT_SECRET`. The secret is **only** in `proxy-server/.env` which is gitignored.
 
 ## ✅ Security Checklist
 
 Verify your setup is secure:
 
 ```bash
-# Check that sensitive files are gitignored
-git check-ignore proxy-server/.env config.js
-# Should output both file paths
+# Check that .env is gitignored (contains CLIENT_SECRET)
+git check-ignore proxy-server/.env
+# Should output: proxy-server/.env
 
-# Verify no secrets in tracked files
+# Verify no CLIENT_SECRET in tracked files
 git grep "Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO"
-# Should find nothing (or only in this README as an example)
+# Should find nothing in tracked files
 
-# Check what's staged for commit
+# Check what will be committed
 git status
-# Should NOT show .env or config.js
+# Should show config.js (SAFE - no secrets)
+# Should NOT show proxy-server/.env (SECRET!)
 ```
 
 ## 🌐 Deployment

@@ -56,22 +56,22 @@ Set these environment variables in your hosting platform:
 - `TIKTOK_REDIRECT_URI`
 
 #### Frontend (GitHub Pages):
-You'll need to commit `config.js` for GitHub Pages to serve it. Options:
 
-**Option 1: Create a public config (Recommended for GitHub Pages)**
+**For GitHub Pages, `config.js` MUST be committed (and it's safe!):**
+
 ```javascript
-// config.js - Safe to commit
+// config.js - Safe to commit (NO secrets!)
 const CONFIG = {
-    CLIENT_KEY: "your_client_key_here",  // ✅ Public, safe
-    REDIRECT_URI: "https://yourusername.github.io/callback.html",  // ✅ Public, safe
-    PROXY_URL: "https://your-proxy.onrender.com",  // ✅ Public, safe
-    AUTHORIZE_URL: "https://www.tiktok.com/v2/auth/authorize/"  // ✅ Public API endpoint
+    CLIENT_KEY: "sbawjjtuzyd0z5u7fv",  // ✅ Public identifier (safe)
+    REDIRECT_URI: "https://kennethmyrwjy.github.io/callback.html",  // ✅ Public URL (safe)
+    PROXY_URL: "https://your-proxy.onrender.com",  // ✅ Public endpoint (safe)
+    AUTHORIZE_URL: "https://www.tiktok.com/v2/auth/authorize/"  // ✅ Public API (safe)
 };
 ```
-Then remove `config.js` from `.gitignore` and commit it.
 
-**Option 2: Use environment-specific builds**
-Keep config.js gitignored and manually copy it to your deployment.
+**Why it's safe:** None of these values are secret. They're all visible in browser network requests anyway. The `CLIENT_SECRET` is what must stay private, and that's only in the backend `.env` file.
+
+`config.js` is NOT in `.gitignore`, so it will be committed and served by GitHub Pages.
 
 ## ⚠️ Critical Security Rules
 

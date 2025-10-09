@@ -1,5 +1,6 @@
 # Sensitive configuration files
-config.js
+# NOTE: config.js is NOT gitignored because it's safe to commit (no CLIENT_SECRET)
+# Only the backend .env file contains secrets
 .env
 .env.local
 
