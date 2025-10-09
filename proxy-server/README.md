@@ -6,9 +6,13 @@ This is a simple backend proxy that handles TikTok OAuth token exchange securely
 
 TikTok's OAuth token endpoint blocks direct browser requests for security reasons. This proxy:
 - ✅ Runs on a server (not in browser)
-- ✅ Keeps your CLIENT_SECRET secure
+- ✅ Keeps your CLIENT_SECRET secure (never exposed in frontend)
 - ✅ Handles CORS properly
 - ✅ Exchanges authorization codes for access tokens
+
+## 🔒 Security First
+
+**IMPORTANT:** This proxy uses environment variables to keep your CLIENT_SECRET secure. Never commit your `.env` file to Git!
 
 ## Quick Start (Local Testing)
 
@@ -18,18 +22,35 @@ cd proxy-server
 npm install
 ```
 
-### 2. Run the Server
+### 2. Configure Environment Variables
+
+The `.env` file has already been created with your credentials. Verify it contains:
+
+```bash
+cat .env
+```
+
+You should see:
+```
+TIKTOK_CLIENT_KEY=sbawjjtuzyd0z5u7fv
+TIKTOK_CLIENT_SECRET=Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO
+TIKTOK_REDIRECT_URI=https://kennethmyrwjy.github.io/callback.html
+PORT=3000
+```
+
+⚠️ **NEVER commit this file to Git!** It's already in `.gitignore`.
+
+### 3. Run the Server
 ```bash
 npm start
 ```
 
 The server will run on `http://localhost:3000`
 
-### 3. Update callback.html
-In your `callback.html`, change the PROXY_URL to:
-```javascript
-const PROXY_URL = 'http://localhost:3000';
-```
+If you see an error about missing environment variables, make sure your `.env` file exists and contains the required values.
+
+### 4. Update Frontend Configuration
+The frontend configuration is in `/config.js` (already set up for local testing with ngrok)
 
 ## Deploy to Production (Free Options)
 

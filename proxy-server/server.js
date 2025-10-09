@@ -2,12 +2,26 @@
 // This handles the token exchange securely on the backend
 // Deploy to Render, Railway, or run locally
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Validate required environment variables
+if (!process.env.TIKTOK_CLIENT_KEY || !process.env.TIKTOK_CLIENT_SECRET || !process.env.TIKTOK_REDIRECT_URI) {
+    console.error('❌ ERROR: Missing required environment variables!');
+    console.error('Please create a .env file with:');
+    console.error('  - TIKTOK_CLIENT_KEY');
+    console.error('  - TIKTOK_CLIENT_SECRET');
+    console.error('  - TIKTOK_REDIRECT_URI');
+    console.error('\nSee .env.example for template');
+    process.exit(1);
+}
 
 // CORS configuration - allow your GitHub Pages domain
 app.use(cors({
@@ -22,10 +36,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// TikTok credentials (in production, use environment variables!)
-const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY || 'sbawjjtuzyd0z5u7fv';
-const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET || 'Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO';
-const REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI || 'https://kennethmyrwjy.github.io/callback.html';
+// TikTok credentials from environment variables (SECURE)
+const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
+const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
+const REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI;
 
 // Health check endpoint
 app.get('/', (req, res) => {

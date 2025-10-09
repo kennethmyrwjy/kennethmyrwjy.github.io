@@ -22,16 +22,14 @@
     <div class="profile" id="profile"></div>
     <div class="videos" id="videos"></div>
 </div>
+<script src="config.js"></script>
 <script>
-    // ==== Replace with your credentials for the test ====
-    const CLIENT_KEY = 'sbawjjtuzyd0z5u7fv';
-    const CLIENT_SECRET = 'Qdq5gHGlMppmWIFVgpxqDo18Wa7XQFhO';
-    const REDIRECT_URI = 'https://kennethmyrwjy.github.io/callback.html';
+    // Configuration loaded from config.js
+    const CLIENT_KEY = CONFIG.CLIENT_KEY;
+    const REDIRECT_URI = CONFIG.REDIRECT_URI;
+    const PROXY_URL = CONFIG.PROXY_URL;
     
-    // ==== PROXY SERVER CONFIGURATION ====
-    // Change this to your deployed proxy URL (e.g., https://your-app.onrender.com)
-    // For local testing: 'http://localhost:3000'
-    const PROXY_URL = 'https://faceless-deafeningly-geralyn.ngrok-free.dev'; // ngrok tunnel to localhost:3000
+    // CLIENT_SECRET is NOT needed in frontend - it's only used in the backend proxy server!
 
     function getQueryParam(name) {
         const params = new URLSearchParams(window.location.search);
