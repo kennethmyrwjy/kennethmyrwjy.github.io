@@ -55,9 +55,11 @@
             return;
         }
         const SCOPES = checkedScopes.join(' ');
-        console.log(SCOPES)
+        console.log('Selected scopes:', SCOPES);
         const state = createState();
         localStorage.setItem("tiktokState", state);
+        // Store selected scopes so callback.html knows what to fetch
+        localStorage.setItem("tiktokScopes", SCOPES);
         const url = `${AUTHORIZE_URL}?client_key=${encodeURIComponent(CLIENT_KEY)}&scope=${encodeURIComponent(SCOPES)}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${encodeURIComponent(state)}`;
         window.location.href = url;
     }

@@ -87,17 +87,24 @@
 
             if (data.access_token && data.open_id) {
                 document.getElementById('result').innerText = 'Token acquired! Loading profile info...';
-                fetchProfile(data.access_token);
-                // Skip video fetching in sandbox mode - uncomment below for production
-                // fetchVideos(data.access_token, data.open_id);
                 
-                // Show sandbox video message
-                document.getElementById('videos').innerHTML = 
-                    `<div style="color: #95a5a6; padding: 15px; background: #ecf0f1; border-radius: 6px; margin-top: 20px;">
-                        <strong>📹 Video List Endpoint</strong><br><br>
-                        The <code>video.list</code> endpoint is not available in sandbox mode. 
-                        To test video functionality, your app needs production approval.
-                    </div>`;
+                // Get the scopes that were selected during login
+                const selectedScopes = localStorage.getItem("tiktokScopes") || "user.info.basic";
+                console.log('Fetching data for scopes:', selectedScopes);
+                
+                // Fetch profile data based on selected scopes
+                fetchProfile(data.access_token, selectedScopes);
+                
+                // If video.list scope was selected, try to fetch videos
+                if (selectedScopes.includes('video.list')) {
+                    fetchVideos(data.access_token, data.open_id);
+                } else {
+                    document.getElementById('videos').innerHTML = 
+                        `<div style="color: #95a5a6; padding: 15px; background: #ecf0f1; border-radius: 6px; margin-top: 20px;">
+                            <strong>📹 Video List</strong><br><br>
+                            Video list scope was not selected. To fetch videos, select the <code>video.list</code> scope on the login page.
+                        </div>`;
+                }
             } else {
                 document.getElementById('result').innerHTML = 
                     `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
@@ -122,10 +129,32 @@
         }
     }
 
-    async function fetchProfile(token) {
-        // Request only basic fields that work in sandbox mode
-        // Basic scope fields: open_id, union_id, avatar_url, display_name
-        const url = 'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name';
+    async function fetchProfile(token, selectedScopes) {
+        // Build fields to request based on selected scopes
+        let fields = [];
+        
+        // user.info.basic - Basic profile info
+        if (selectedScopes.includes('user.info.basic')) {
+            fields.push('open_id', 'union_id', 'avatar_url', 'display_name');
+        }
+        
+        // user.info.profile - Extended profile info
+        if (selectedScopes.includes('user.info.profile')) {
+            fields.push('bio_description', 'region', 'gender', 'signup_time', 'profile_deep_link');
+        }
+        
+        // user.info.stats - User statistics
+        if (selectedScopes.includes('user.info.stats')) {
+            fields.push('follower_count', 'following_count', 'likes_count', 'video_count');
+        }
+        
+        // Remove duplicates and build query
+        fields = [...new Set(fields)];
+        const fieldsParam = fields.join(',');
+        
+        console.log('Requesting fields:', fieldsParam);
+        
+        const url = `https://open.tiktokapis.com/v2/user/info/?fields=${fieldsParam}`;
         const res = await fetch(url, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -184,56 +213,120 @@
         
         if (data.data && data.data.user) {
             const u = data.data.user;
-
-            document.getElementById('profile').innerHTML =
-                `<div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                    ${u.avatar_url ? `<img class="avatar" src="${u.avatar_url}" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">` : '<div style="width: 100px; height: 100px; background: #ddd; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">No Avatar</div>'}
-                    <h3 style="margin: 10px 0; color: #2c3e50;">${u.display_name || 'Unknown User'}</h3>
-                </div>
-                <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #27ae60;">
-                    <h4 style="margin-top: 0; color: #27ae60;">✅ Basic User Info (Sandbox Mode)</h4>
+            
+            // Build HTML based on available data
+            let html = `<div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                ${u.avatar_url ? `<img class="avatar" src="${u.avatar_url}" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">` : '<div style="width: 100px; height: 100px; background: #ddd; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">No Avatar</div>'}
+                <h3 style="margin: 10px 0; color: #2c3e50;">${u.display_name || 'Unknown User'}</h3>
+            </div>`;
+            
+            // Basic Info Section (if user.info.basic scope)
+            if (selectedScopes.includes('user.info.basic')) {
+                html += `<div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #27ae60;">
+                    <h4 style="margin-top: 0; color: #27ae60;">✅ Basic Info (user.info.basic)</h4>
                     <table style="width: 100%;">
-                      <tr><th style="text-align: left; padding: 8px;">Display Name</th><td style="padding: 8px;">${u.display_name || 'Not provided'}</td></tr>
-                      <tr><th style="text-align: left; padding: 8px;">Open ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.open_id || 'Not provided'}</td></tr>
-                      <tr><th style="text-align: left; padding: 8px;">Union ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.union_id || 'Not provided'}</td></tr>
-                      <tr><th style="text-align: left; padding: 8px;">Avatar URL</th><td style="padding: 8px;">${u.avatar_url ? '<span style="color: #27ae60;">✓ Available</span>' : '<span style="color: #e74c3c;">✗ Not available</span>'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Display Name</th><td style="padding: 8px;">${u.display_name || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Open ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.open_id || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Union ID</th><td style="padding: 8px; font-family: monospace; font-size: 12px;">${u.union_id || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Avatar URL</th><td style="padding: 8px;">${u.avatar_url ? '<span style="color: #27ae60;">✓ Available</span>' : 'N/A'}</td></tr>
                     </table>
-                    <p style="margin: 15px 0 5px 0; font-size: 13px; color: #555;">
-                        <strong>Note:</strong> This is the maximum data available with <code>user.info.basic</code> scope in sandbox mode. 
-                        For more data (bio, followers, videos), your app needs production approval.
+                </div>`;
+            }
+            
+            // Profile Info Section (if user.info.profile scope)
+            if (selectedScopes.includes('user.info.profile')) {
+                html += `<div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 6px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0; color: #2196f3;">📝 Profile Info (user.info.profile)</h4>
+                    <table style="width: 100%;">
+                      <tr><th style="text-align: left; padding: 8px;">Bio</th><td style="padding: 8px;">${u.bio_description || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Region</th><td style="padding: 8px;">${u.region || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Gender</th><td style="padding: 8px;">${u.gender || 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Signup Time</th><td style="padding: 8px;">${u.signup_time ? new Date(u.signup_time * 1000).toLocaleString() : 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Profile Link</th><td style="padding: 8px;">${u.profile_deep_link ? `<a href="${u.profile_deep_link}" target="_blank">Open Profile</a>` : 'N/A'}</td></tr>
+                    </table>
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                        ⚠️ Limited in sandbox mode - may show "N/A" until production approval
                     </p>
                 </div>`;
+            }
+            
+            // Stats Section (if user.info.stats scope)
+            if (selectedScopes.includes('user.info.stats')) {
+                html += `<div style="margin-top: 20px; padding: 15px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin-top: 0; color: #ff9800;">📊 Statistics (user.info.stats)</h4>
+                    <table style="width: 100%;">
+                      <tr><th style="text-align: left; padding: 8px;">Followers</th><td style="padding: 8px;">${u.follower_count !== undefined ? u.follower_count.toLocaleString() : 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Following</th><td style="padding: 8px;">${u.following_count !== undefined ? u.following_count.toLocaleString() : 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Likes</th><td style="padding: 8px;">${u.likes_count !== undefined ? u.likes_count.toLocaleString() : 'N/A'}</td></tr>
+                      <tr><th style="text-align: left; padding: 8px;">Videos</th><td style="padding: 8px;">${u.video_count !== undefined ? u.video_count.toLocaleString() : 'N/A'}</td></tr>
+                    </table>
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                        ⚠️ Not available in sandbox mode - requires production approval
+                    </p>
+                </div>`;
+            }
+            
+            // General note
+            html += `<div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 6px; font-size: 13px; color: #666;">
+                <strong>ℹ️ Note:</strong> Data availability depends on:
+                <ul style="margin: 10px 0 0 20px; line-height: 1.6;">
+                    <li>Selected scopes during login</li>
+                    <li>Approved scopes in TikTok Developer Portal</li>
+                    <li>App status (Sandbox vs Production)</li>
+                </ul>
+                <p style="margin: 10px 0 0 0;">
+                    Most extended data (profile, stats) requires production approval from TikTok.
+                </p>
+            </div>`;
+            
+            document.getElementById('profile').innerHTML = html;
         } else {
             document.getElementById('profile').innerText = 'Could not fetch profile data: ' + JSON.stringify(data);
         }
     }
 
     async function fetchVideos(token, open_id) {
+        document.getElementById('videos').innerHTML = 
+            `<div style="padding: 15px; background: #f0f0f0; border-radius: 6px; margin-top: 20px;">
+                <strong>📹 Loading videos...</strong>
+            </div>`;
+            
         // Pull videos if scope allows
-        const url = `https://open.tiktokapis.com/v2/video/list/?fields=video_id,video_description,cover_image_url,share_url,create_time,duration,tags,statistics&open_id=${open_id}`;
+        const url = `https://open.tiktokapis.com/v2/video/list/?fields=video_id,video_description,cover_image_url,share_url,create_time,duration,tags,statistics`;
         const res = await fetch(url, {
-            headers: { 'Authorization': 'Bearer ' + token }
+            method: 'POST',
+            headers: { 
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                max_count: 20
+            })
         });
         const data = await res.json();
         
-        // Check for errors (including scope authorization issues)
-        if (data.error) {
+        console.log('TikTok video/list response:', data);
+        
+        // Check for actual errors (code is NOT "ok")
+        if (data.error && data.error.code && data.error.code !== "ok") {
             document.getElementById('videos').innerHTML = 
-                `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
+                `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px; margin-top: 20px;">
                     <strong>Error fetching videos:</strong><br>
                     ${data.error.message || JSON.stringify(data.error)}<br><br>
-                    <em>Make sure you selected the "video.list" scope and that it's approved in your TikTok Developer Portal.</em>
+                    <em>Error code: ${data.error.code}</em><br>
+                    <em>Make sure the "video.list" scope is approved in your TikTok Developer Portal.</em>
                 </div>`;
             return;
         }
         
         // Check for sandbox mode (successful but empty response)
-        if (data.code === "ok" && (!data.data || !data.data.videos || data.data.videos.length === 0)) {
+        if ((data.code === "ok" || (data.error && data.error.code === "ok")) && (!data.data || !data.data.videos || data.data.videos.length === 0)) {
             document.getElementById('videos').innerHTML = 
-                `<div style="color: #f39c12; padding: 15px; background: #fef5e7; border-radius: 6px;">
-                    <strong>⚠️ Video list unavailable in Sandbox Mode</strong><br><br>
-                    The video.list endpoint may not be available or returns empty data in TikTok Sandbox Mode.
-                    Submit your app for production review to access real video data.
+                `<div style="color: #f39c12; padding: 15px; background: #fef5e7; border-radius: 6px; margin-top: 20px;">
+                    <h4 style="margin-top: 0;">⚠️ Video List (video.list scope)</h4>
+                    <p><strong>Sandbox Mode:</strong> The video.list endpoint returns no data in sandbox mode.</p>
+                    <p style="margin-bottom: 10px; font-size: 13px;">TikTok API returned: <code style="font-size: 11px;">${JSON.stringify(data)}</code></p>
+                    <p style="margin: 10px 0;">To access video data, submit your app for production review in the TikTok Developer Portal.</p>
                 </div>`;
             return;
         }
