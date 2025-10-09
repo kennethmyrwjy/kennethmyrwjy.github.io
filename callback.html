@@ -131,19 +131,24 @@
         });
         const data = await res.json();
         
-        // Check for errors (including scope authorization issues)
-        if (data.error) {
+        console.log('TikTok user/info response:', data);
+        
+        // Check for actual errors (code is NOT "ok")
+        // TikTok returns error.code="ok" for successful requests (even with empty data)
+        if (data.error && data.error.code && data.error.code !== "ok") {
             document.getElementById('profile').innerHTML = 
                 `<div style="color: #e74c3c; padding: 15px; background: #fadbd8; border-radius: 6px;">
                     <strong>Error fetching profile:</strong><br>
                     ${data.error.message || JSON.stringify(data.error)}<br><br>
-                    <em>This may be due to missing scopes. Make sure you selected all required scopes on the login page and that your TikTok app has these scopes approved in the Developer Portal.</em>
+                    <em>Error code: ${data.error.code}</em><br>
+                    <em>This may be due to missing scopes or API permissions. Check your TikTok Developer Portal settings.</em>
                 </div>`;
             return;
         }
         
-        // Check for successful but empty response (sandbox mode with basic scope)
-        if (data.code === "ok" && (!data.data || !data.data.user)) {
+        // Check for successful response with code="ok" but no data (sandbox mode)
+        // TikTok can return just {code: "ok", message: "", log_id: "..."} in sandbox
+        if ((data.code === "ok" || (data.error && data.error.code === "ok")) && (!data.data || !data.data.user)) {
             document.getElementById('profile').innerHTML = 
                 `<div style="color: #f39c12; padding: 20px; background: #fef5e7; border-radius: 6px; border-left: 4px solid #f39c12;">
                     <h3 style="margin-top: 0;">🎉 OAuth Flow Successful!</h3>
