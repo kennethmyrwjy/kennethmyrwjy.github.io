@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TikTok Login Redirect</title>
+  <script>
+    window.onload = function() {
+      // Parse query string (e.g. ?code=XXX&state=YYY)
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      
+      if (code) {
+        // Construct universal link or custom scheme (e.g., myapp://oauth?code=XXX)
+        // Replace 'https://myapp.com/oauth' with your actual universal link or deep link
+        // const redirectUrl = `https://myapp.com/oauth?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+        // window.location.replace(redirectUrl);
+        window.location.href = `egganalytics://oauth?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+      } else {
+        document.body.innerHTML = "<h3>Error: TikTok did not return a code parameter.</h3>";
+      }
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting to app...</p>
+</body>
+</html>
