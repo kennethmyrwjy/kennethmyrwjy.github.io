@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Egg-Instagram Login Redirect</title>
+</head>
+<body>
+    <h2>Processing Login...</h2>
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Extract authorization code or error from query params
+        const authCode = getQueryParam('code');
+        const error = getQueryParam('error');
+
+        if (authCode) {
+            // Redirect back to the iOS app with the authorization code
+            window.location.href = `egg.engage://auth?code=${authCode}`;
+        } else if (error) {
+            document.body.innerHTML = `<h3>Login failed: ${error}</h3>`;
+        } else {
+            document.body.innerHTML = '<h3>No authorization code received.</h3>';
+        }
+    </script>
+</body>
+</html>
