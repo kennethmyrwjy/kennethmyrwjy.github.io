@@ -19,7 +19,7 @@
 
         if (authCode) {
             // Redirect back to the iOS app with the authorization code
-            window.location.href = `egg.engage://auth?code=${authCode}`;
+            window.location.href = `engage://auth?code=${authCode}`;
         } else if (error) {
             document.body.innerHTML = `<h3>Login failed: ${error}</h3>`;
         } else {
