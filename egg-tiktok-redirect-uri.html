@@ -3,9 +3,41 @@
 <head>
     <title>TikTok OAuth Redirect</title>
     <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7fafe;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding-top: 80px;
+        }
+        .container {
+            display: inline-block;
+            background: #fff;
+            padding: 36px 30px 28px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px 0 #eaeaea;
+        }
+        button {
+            margin-top: 28px;
+            padding: 12px 30px;
+            font-size: 16px;
+            background: #2892f2;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1464a5;
+        }
+    </style>
 </head>
 <body>
-    <h1>Processing TikTok Authentication...</h1>
+    <div class="container" id="main-content">
+        <h1>Processing TikTok Authentication...</h1>
+    </div>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
@@ -17,8 +49,17 @@
         } else if (error) {
             window.location.href = `engage://oauth?error=${error}`;
         } else {
-            window.location.href = "index.html";
-            document.body.innerHTML = '<h1>Error: No authorization code received</h1>';
+            // Show explanation and button if accessed directly
+            document.getElementById('main-content').innerHTML = `
+                <h1>This page is not meant to be visited directly</h1>
+                <p>
+                    This TikTok OAuth callback page should only be accessed via the app.<br>
+                    If you landed here by mistake or want to test, click the button below.
+                </p>
+                <button onclick="window.location.href='https://kennethmyrwjy.github.io/index.html'">
+                    Go to Test Page
+                </button>
+            `;
         }
     </script>
 </body>
