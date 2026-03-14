@@ -46,27 +46,26 @@ const Index = () => {
         <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={0} className="space-y-6">
           <div className="space-y-3">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              John Doe
+              Kenneth Mayer
             </h1>
-            <p className="text-xl font-medium text-primary">iOS Developer</p>
+            <p className="text-xl font-medium text-primary">Software Engineer</p>
           </div>
           <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
-            I craft polished, performant iOS apps with a focus on clean architecture and delightful user experiences.
-            5+ years shipping apps to the App Store.
+            Well-versed in all tech-stacks and confident in end-to-end development process. Honed user-facing mentality. Comfortable in cross-discipline collaboration.
           </p>
           <div className="flex gap-3">
             <Button variant="ghost" size="icon" asChild>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              <a href="https://github.com/kennethmyrwjy" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
                 <Github className="h-5 w-5" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/in/kenneth-mayer-wijaya-876776293/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                 <Linkedin className="h-5 w-5" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <a href="mailto:hello@example.com" aria-label="Email">
+              <a href="mailto:wkennethmayer@gmail.com" aria-label="Email">
                 <Mail className="h-5 w-5" />
               </a>
             </Button>
@@ -76,11 +75,18 @@ const Index = () => {
         {/* Skills */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="space-y-6">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">Skills & Tech Stack</h2>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill) => (
-              <Badge key={skill.name} variant="secondary" className="px-3 py-1.5 text-sm font-medium">
-                {skill.name}
-              </Badge>
+          <div className="space-y-6">
+            {skills.map((group) => (
+              <div key={group.category} className="space-y-3">
+                <h3 className="text-lg font-medium text-foreground/80">{group.category}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map((skill) => (
+                    <Badge key={skill} variant="secondary" className="px-3 py-1.5 text-sm font-medium">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </motion.section>
@@ -103,9 +109,9 @@ const Index = () => {
                   className="group block rounded-xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="text-4xl" role="img" aria-label={project.name}>
-                      {project.icon}
-                    </span>
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
+                      <img src={project.icon} alt={`${project.name} logo`} className="h-full w-full object-cover" loading="lazy" />
+                    </div>
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
@@ -164,7 +170,7 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="border-t pt-8 pb-12 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} John Doe. Built with care.
+          © {new Date().getFullYear()} Kenneth Mayer. Built as a testament of learning.
         </footer>
       </main>
     </div>
