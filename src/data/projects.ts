@@ -141,6 +141,37 @@ export const projects: Project[] = [
       }
     ]
   },
+  {
+    slug: "COCO.CO",
+    name: "COCO.CO",
+    tagline: "Refined post-purchase experience for travel booking app.",
+    description: [
+      "COCO.CO is a travel booking app just like any other, where users can book tickets for trips and experiences, as well as organize their travel plans.",
+      "Post-purchase enhancement was done by providing users with a single shareable page that compiles all necessary information before, and during the trip, such as things to prepare, meetup location, etc.",
+      "The app was built by mentors of Apple Developer Academy, with the enhancement built entirely by learners. The app uses legacy UIKit code, and we built upon it using the same language and framework to keep the codebase consistent.",
+    ],
+    icon: "/coco/coco-logo.png",
+    isPublic: false,
+    techStack: ["UIKit", "Foundation", "CoreLocation", "MapKit", "EventKit"],
+    role: "iOS Developer",
+    teamSize: "1 PM, 2 Designer, 3 Engineer",
+    timeline: "Feb 2026",
+    appStoreUrl: "https://apps.apple.com/",
+    screenshots: ["/coco/coco-1.png", "/coco/coco-2.png", "/coco/coco-3.png", "/coco/coco-4.png", "/coco/coco-5.png", "/coco/coco-6.png", "/coco/coco-7.png", "/coco/coco-8.png"],
+    technicalHighlights: [
+      {
+        title: "Legacy UIKit Integration",
+        description: "The app was built using UIKit, which uses rather different structure to SwiftUI. We used similar approach, but added modifications that benefitted UIKit's structure, such as using MVVM+C for better concern separation and readability. The added enhancements all use UIKit's native capabilities."
+      },
+    ],
+    challenges: [
+      {
+        title: "Post-purchase Experience Enhancement Ideation",
+        description: "Post-purchase experience enhancement is a very broad topic, which makes it difficult to narrow down into a specific feature that tackles a plagueing issue for users. We are unable to use obvious non-technical methods such as better customer service, etc. since that is not what we are aiming for as developers.",
+        solution: "Ideation was done by gathering as many opinions as possible, since trip booking apps are widely used. We then compiled the feedback into one fundamental issue, that is fragmented information and lack of preparation for the trip, causing massive headache for the trip planner. Thus, we created a shareable page that compiles all necessary information for the trip, and added features such as checklist and calendar integration to help users prepare for their trip."
+      }
+    ]
+  },
 ];
 
 export const skills = [
