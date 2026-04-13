@@ -150,14 +150,14 @@ export const projects: Project[] = [
       "Post-purchase enhancement was done by providing users with a single shareable page that compiles all necessary information before, and during the trip, such as things to prepare, meetup location, etc.",
       "The app was built by mentors of Apple Developer Academy, with the enhancement built entirely by learners. The app uses legacy UIKit code, and we built upon it using the same language and framework to keep the codebase consistent.",
     ],
-    icon: "/coco/coco-logo.png",
+    icon: "/coco.co/coco-logo.png",
     isPublic: false,
     techStack: ["UIKit", "Foundation", "CoreLocation", "MapKit", "EventKit"],
     role: "iOS Developer",
     teamSize: "1 PM, 2 Designer, 3 Engineer",
     timeline: "Feb 2026",
     appStoreUrl: "https://apps.apple.com/",
-    screenshots: ["/coco/coco-1.png", "/coco/coco-2.png", "/coco/coco-3.png", "/coco/coco-4.png", "/coco/coco-5.png", "/coco/coco-6.png", "/coco/coco-7.png", "/coco/coco-8.png"],
+    screenshots: ["/coco.co/coco-1.png", "/coco.co/coco-2.png", "/coco.co/coco-3.png", "/coco.co/coco-4.png"],
     technicalHighlights: [
       {
         title: "Legacy UIKit Integration",
