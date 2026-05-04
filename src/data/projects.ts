@@ -34,7 +34,7 @@ export const projects: Project[] = [
     ],
     icon: "/move/move-logo.svg",
     isPublic: false,
-    techStack: ["React.js", "TypeScript", "Vite", "Go Fiber", "Capacitor", "PostgreSQL", "Firebase FCM", "RESTful API", "Push Notifications"],
+    techStack: ["React Native", "TypeScript", "Vite", "Go Fiber", "Capacitor", "PostgreSQL", "RESTful API", "Push Notifications(APNs/FCM)"],
     role: "Full-Stack Developer",
     teamSize: "2 Engineers",
     timeline: "Feb 2026 - March 2026 (Phase 1)",
